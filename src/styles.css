@@ -1,0 +1,38 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+  overflow: hidden;
+  background: radial-gradient(circle at center, #050510, #000000);
+  color: white;
+}
+
+canvas {
+  display: block;
+}
+
+.ui {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 15px 20px;
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ui h1 {
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+
+.ui p {
+  font-size: 13px;
+  opacity: 0.8;
+  line-height: 1.4;
+}
