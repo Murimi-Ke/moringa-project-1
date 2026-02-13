@@ -62,6 +62,127 @@ canvas {
   transform: translateY(0);
 }
 
+.technical-btn {
+  margin-top: 8px;
+  padding: 8px 16px;
+  background: rgba(100, 100, 255, 0.2);
+  border: 1px solid rgba(100, 100, 255, 0.4);
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.technical-btn:hover {
+  background: rgba(100, 100, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.technical-btn:active {
+  transform: translateY(0);
+}
+
+/* Technical Section */
+.technical-section {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(10px);
+  overflow-y: auto;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.technical-section.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.close-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 101;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: rotate(90deg);
+}
+
+.technical-content {
+  max-width: 900px;
+  margin: 60px auto;
+  padding: 40px 20px;
+}
+
+.technical-content h2 {
+  font-size: 36px;
+  margin-bottom: 40px;
+  text-align: center;
+  background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.tech-block {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 30px;
+  margin-bottom: 30px;
+  backdrop-filter: blur(5px);
+}
+
+.tech-block h3 {
+  font-size: 24px;
+  margin-bottom: 15px;
+  color: #667eea;
+}
+
+.tech-block p {
+  font-size: 16px;
+  line-height: 1.8;
+  margin-bottom: 15px;
+  opacity: 0.9;
+}
+
+.tech-block ul {
+  margin-left: 20px;
+  margin-top: 10px;
+}
+
+.tech-block li {
+  font-size: 15px;
+  line-height: 1.8;
+  margin-bottom: 8px;
+  opacity: 0.85;
+}
+
+.tech-block strong {
+  color: #f093fb;
+}
+
 /* Loader styles */
 .loader {
   position: fixed;

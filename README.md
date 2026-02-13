@@ -25,3 +25,9 @@ Built with:
 - Loader with random planetary facts
 - Random UFOs
 - Random Satellites 
+
+### v3 - 0AD
+- Added black hole effect to reset
+- Added planetary trivia
+- Added SFX to planet collision
+

@@ -14,8 +14,16 @@ const stars = [];
 const particles = [];
 const ufos = [];
 const satellites = [];
+const meteors = [];
 const G = 0.05; // gravity strength
 let hueShift = 0;
+let isResetting = false;
+let blackHoleRadius = 0;
+let resetPhase = 0; // 0: normal, 1: black hole forming, 2: consuming, 3: imploding
+
+// Collision sound
+const collisionSound = new Audio('content/media/audio/pop.mp3');
+collisionSound.volume = 0.3;
 
 // Planetary facts for loader
 const planetaryFacts = [
@@ -178,6 +186,83 @@ class Satellite {
   }
 }
 
+// Meteor class
+class Meteor {
+  constructor() {
+    const side = Math.floor(Math.random() * 4);
+    switch(side) {
+      case 0: // top
+        this.x = Math.random() * canvas.width;
+        this.y = -20;
+        break;
+      case 1: // right
+        this.x = canvas.width + 20;
+        this.y = Math.random() * canvas.height;
+        break;
+      case 2: // bottom
+        this.x = Math.random() * canvas.width;
+        this.y = canvas.height + 20;
+        break;
+      case 3: // left
+        this.x = -20;
+        this.y = Math.random() * canvas.height;
+        break;
+    }
+    
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const angle = Math.atan2(centerY - this.y, centerX - this.x);
+    const speed = Math.random() * 3 + 2;
+    
+    this.vx = Math.cos(angle) * speed;
+    this.vy = Math.sin(angle) * speed;
+    this.radius = Math.random() * 4 + 2;
+    this.trail = [];
+    this.trailLength = 10;
+  }
+
+  update() {
+    this.trail.push({ x: this.x, y: this.y });
+    if (this.trail.length > this.trailLength) {
+      this.trail.shift();
+    }
+    
+    this.x += this.vx;
+    this.y += this.vy;
+  }
+
+  draw() {
+    // Draw trail
+    for (let i = 0; i < this.trail.length; i++) {
+      const alpha = i / this.trail.length;
+      ctx.beginPath();
+      ctx.arc(this.trail[i].x, this.trail[i].y, this.radius * alpha, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 150, 50, ${alpha * 0.6})`;
+      ctx.fill();
+    }
+    
+    // Draw meteor
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(255, 200, 100, 0.9)";
+    ctx.fill();
+    
+    // Glow
+    const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * 2);
+    gradient.addColorStop(0, "rgba(255, 150, 50, 0.5)");
+    gradient.addColorStop(1, "rgba(255, 150, 50, 0)");
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius * 2, 0, Math.PI * 2);
+    ctx.fillStyle = gradient;
+    ctx.fill();
+  }
+
+  isOffscreen() {
+    return this.x < -50 || this.x > canvas.width + 50 || 
+           this.y < -50 || this.y > canvas.height + 50;
+  }
+}
+
 // Planet class
 class Planet {
   constructor(x, y) {
@@ -191,6 +276,25 @@ class Planet {
     this.vy = (Math.random() - 0.5) * 2;
 
     this.color = `hsl(${Math.random() * 360}, 70%, 60%)`;
+    this.hasRings = Math.random() > 0.7;
+    this.details = this.generateDetails();
+  }
+
+  generateDetails() {
+    const details = [];
+    const numDetails = Math.floor(Math.random() * 5) + 3;
+    
+    for (let i = 0; i < numDetails; i++) {
+      details.push({
+        type: Math.random() > 0.5 ? 'spot' : 'line',
+        angle: Math.random() * Math.PI * 2,
+        distance: Math.random() * 0.7,
+        size: Math.random() * 0.3 + 0.1,
+        brightness: Math.random() > 0.5 ? 1.3 : 0.7
+      });
+    }
+    
+    return details;
   }
 
   update() {
@@ -211,10 +315,44 @@ class Planet {
   }
 
   draw() {
+    // Main planet body
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     ctx.fillStyle = this.color;
     ctx.fill();
+    
+    // Add details if planet is large enough
+    if (this.radius > 15) {
+      this.details.forEach(detail => {
+        const detailX = this.x + Math.cos(detail.angle) * this.radius * detail.distance;
+        const detailY = this.y + Math.sin(detail.angle) * this.radius * detail.distance;
+        
+        if (detail.type === 'spot') {
+          ctx.beginPath();
+          ctx.arc(detailX, detailY, this.radius * detail.size, 0, Math.PI * 2);
+          const hsl = this.color.match(/\d+/g);
+          ctx.fillStyle = `hsl(${hsl[0]}, ${hsl[1]}%, ${parseInt(hsl[2]) * detail.brightness}%)`;
+          ctx.fill();
+        } else {
+          ctx.strokeStyle = this.color.replace('60%', `${60 * detail.brightness}%`);
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius * (0.5 + detail.distance * 0.5), 
+                  detail.angle - 0.5, detail.angle + 0.5);
+          ctx.stroke();
+        }
+      });
+      
+      // Add rings if applicable
+      if (this.hasRings && this.radius > 20) {
+        ctx.strokeStyle = this.color.replace('60%', '40%').replace('1)', '0.6)');
+        ctx.lineWidth = this.radius * 0.15;
+        ctx.beginPath();
+        ctx.ellipse(this.x, this.y, this.radius * 1.5, this.radius * 0.3, 
+                    Math.PI * 0.2, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    }
   }
 }
 
@@ -232,6 +370,13 @@ setInterval(() => {
   }
 }, 10000);
 
+// Spawn meteors occasionally
+setInterval(() => {
+  if (Math.random() > 0.5 && meteors.length < 4) {
+    meteors.push(new Meteor());
+  }
+}, 6000);
+
 // Click to spawn planets
 canvas.addEventListener("click", (e) => {
   planets.push(new Planet(e.clientX, e.clientY));
@@ -246,6 +391,10 @@ function handleCollisions() {
       const distance = Math.sqrt(dx * dx + dy * dy);
 
       if (distance < planets[i].radius + planets[j].radius) {
+        // Play collision sound
+        collisionSound.currentTime = 0;
+        collisionSound.play().catch(e => console.log('Audio play failed:', e));
+        
         // Create particle explosion
         const explosionX = (planets[i].x + planets[j].x) / 2;
         const explosionY = (planets[i].y + planets[j].y) / 2;
@@ -258,9 +407,11 @@ function handleCollisions() {
         // Merge smaller into larger
         if (planets[i].radius >= planets[j].radius) {
           planets[i].radius += planets[j].radius * 0.4;
+          planets[i].details = planets[i].generateDetails(); // Regenerate details
           planets.splice(j, 1);
         } else {
           planets[j].radius += planets[i].radius * 0.4;
+          planets[j].details = planets[j].generateDetails(); // Regenerate details
           planets.splice(i, 1);
         }
         return;
@@ -269,11 +420,29 @@ function handleCollisions() {
   }
 }
 
-// Draw center star
+// Draw center star with shimmer effect
 function drawCenterStar() {
   const centerX = canvas.width / 2;
   const centerY = canvas.height / 2;
+  const time = Date.now() * 0.001;
+  
+  // Shimmer effect - outer glow
+  for (let i = 0; i < 3; i++) {
+    const shimmerRadius = 50 + Math.sin(time + i) * 10;
+    const shimmerGradient = ctx.createRadialGradient(
+      centerX, centerY, 0,
+      centerX, centerY, shimmerRadius
+    );
+    shimmerGradient.addColorStop(0, `rgba(255, 255, 200, ${0.3 - i * 0.1})`);
+    shimmerGradient.addColorStop(1, "rgba(255, 255, 200, 0)");
+    
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, shimmerRadius, 0, Math.PI * 2);
+    ctx.fillStyle = shimmerGradient;
+    ctx.fill();
+  }
 
+  // Main star gradient
   const gradient = ctx.createRadialGradient(
     centerX,
     centerY,
@@ -292,13 +461,130 @@ function drawCenterStar() {
   ctx.fill();
 }
 
-// Reset button functionality
+// Black hole reset animation
+function drawBlackHole() {
+  if (resetPhase === 0) return;
+  
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+  
+  if (resetPhase === 1) {
+    // Black hole forming
+    blackHoleRadius += 2;
+    
+    // Dark center
+    const blackGradient = ctx.createRadialGradient(
+      centerX, centerY, 0,
+      centerX, centerY, blackHoleRadius
+    );
+    blackGradient.addColorStop(0, "rgba(0, 0, 0, 1)");
+    blackGradient.addColorStop(0.6, "rgba(20, 0, 40, 0.8)");
+    blackGradient.addColorStop(1, "rgba(100, 0, 200, 0)");
+    
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, blackHoleRadius, 0, Math.PI * 2);
+    ctx.fillStyle = blackGradient;
+    ctx.fill();
+    
+    // Accretion disk
+    ctx.strokeStyle = `rgba(138, 43, 226, ${0.6 * (blackHoleRadius / 60)})`;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, blackHoleRadius * 1.5, 0, Math.PI * 2);
+    ctx.stroke();
+    
+    if (blackHoleRadius >= 60) {
+      resetPhase = 2;
+    }
+  } else if (resetPhase === 2) {
+    // Consuming phase - pull planets in
+    const consumeGradient = ctx.createRadialGradient(
+      centerX, centerY, 0,
+      centerX, centerY, blackHoleRadius * 2
+    );
+    consumeGradient.addColorStop(0, "rgba(0, 0, 0, 1)");
+    consumeGradient.addColorStop(0.5, "rgba(50, 0, 100, 0.6)");
+    consumeGradient.addColorStop(1, "rgba(100, 0, 200, 0)");
+    
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, blackHoleRadius, 0, Math.PI * 2);
+    ctx.fillStyle = consumeGradient;
+    ctx.fill();
+    
+    // Spiral effect
+    const spirals = 6;
+    const time = Date.now() * 0.01;
+    for (let i = 0; i < spirals; i++) {
+      ctx.strokeStyle = `rgba(138, 43, 226, 0.3)`;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let angle = 0; angle < Math.PI * 4; angle += 0.1) {
+        const radius = blackHoleRadius * 1.5 - (angle / (Math.PI * 4)) * blackHoleRadius * 1.5;
+        const x = centerX + Math.cos(angle + time + i * Math.PI / 3) * radius;
+        const y = centerY + Math.sin(angle + time + i * Math.PI / 3) * radius;
+        if (angle === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+    
+    if (planets.length === 0 && particles.length === 0) {
+      resetPhase = 3;
+    }
+  } else if (resetPhase === 3) {
+    // Implosion
+    blackHoleRadius -= 3;
+    
+    const implodeGradient = ctx.createRadialGradient(
+      centerX, centerY, 0,
+      centerX, centerY, Math.max(blackHoleRadius, 5)
+    );
+    implodeGradient.addColorStop(0, "rgba(255, 255, 255, 1)");
+    implodeGradient.addColorStop(0.5, "rgba(200, 150, 255, 0.8)");
+    implodeGradient.addColorStop(1, "rgba(100, 0, 200, 0)");
+    
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, Math.max(blackHoleRadius, 5), 0, Math.PI * 2);
+    ctx.fillStyle = implodeGradient;
+    ctx.fill();
+    
+    if (blackHoleRadius <= 0) {
+      // Create explosion particles for new star birth
+      for (let i = 0; i < 30; i++) {
+        particles.push(new Particle(centerX, centerY, 'rgba(255, 255, 200, 1)'));
+      }
+      resetPhase = 0;
+      isResetting = false;
+      blackHoleRadius = 0;
+    }
+  }
+}
+
+// Reset button functionality with black hole
 document.getElementById("reset-btn").addEventListener("click", () => {
-  planets.length = 0;
-  particles.length = 0;
+  if (isResetting) return;
+  
+  isResetting = true;
+  resetPhase = 1;
+  blackHoleRadius = 40;
+  
+  // Clear other entities immediately
   ufos.length = 0;
   satellites.length = 0;
-  hueShift = 0;
+  meteors.length = 0;
+});
+
+// Technical section toggle
+const technicalSection = document.getElementById("technical-section");
+const technicalBtn = document.getElementById("technical-btn");
+const closeTechnicalBtn = document.getElementById("close-technical");
+
+technicalBtn.addEventListener("click", () => {
+  technicalSection.classList.add("active");
+});
+
+closeTechnicalBtn.addEventListener("click", () => {
+  technicalSection.classList.remove("active");
 });
 
 // Dynamic background hue shift
@@ -316,13 +602,48 @@ function animate() {
 
   drawStarfield();
   updateBackgroundHue();
-  drawCenterStar();
+  
+  // Draw black hole if resetting, otherwise draw star
+  if (resetPhase > 0) {
+    drawBlackHole();
+    
+    // During consumption phase, pull planets toward center
+    if (resetPhase === 2) {
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      
+      planets.forEach((planet) => {
+        const dx = centerX - planet.x;
+        const dy = centerY - planet.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance < blackHoleRadius + planet.radius) {
+          // Planet consumed
+          for (let k = 0; k < 10; k++) {
+            particles.push(new Particle(planet.x, planet.y, planet.color));
+          }
+          planets.splice(planets.indexOf(planet), 1);
+        } else {
+          // Strong pull toward black hole
+          const pullForce = 0.3;
+          planet.vx += (dx / distance) * pullForce;
+          planet.vy += (dy / distance) * pullForce;
+          planet.update();
+          planet.draw();
+        }
+      });
+    }
+  } else {
+    drawCenterStar();
+  }
 
-  // Update and draw planets
-  planets.forEach((planet) => {
-    planet.update();
-    planet.draw();
-  });
+  // Update and draw planets (only if not in consuming phase)
+  if (resetPhase !== 2) {
+    planets.forEach((planet) => {
+      planet.update();
+      planet.draw();
+    });
+  }
 
   // Update and draw particles
   for (let i = particles.length - 1; i >= 0; i--) {
@@ -348,7 +669,18 @@ function animate() {
     satellite.draw();
   });
 
-  handleCollisions();
+  // Update and draw meteors
+  for (let i = meteors.length - 1; i >= 0; i--) {
+    meteors[i].update();
+    meteors[i].draw();
+    if (meteors[i].isOffscreen()) {
+      meteors.splice(i, 1);
+    }
+  }
+
+  if (!isResetting) {
+    handleCollisions();
+  }
 
   requestAnimationFrame(animate);
 }

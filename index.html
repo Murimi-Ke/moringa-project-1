@@ -23,7 +23,60 @@
     <p>Click anywhere to spawn a planet.</p>
     <p>Watch them orbit and merge.</p>
     <button id="reset-btn" class="reset-btn">Reset Universe</button>
+    <button id="technical-btn" class="technical-btn">Let's Get Technical</button>
   </div>
+
+  <!-- Technical Section -->
+  <section id="technical-section" class="technical-section">
+    <button id="close-technical" class="close-btn">✕</button>
+    <div class="technical-content">
+      <h2>🔬 How Universes Work</h2>
+      
+      <div class="tech-block">
+        <h3>Gravity & Orbital Mechanics</h3>
+        <p>In our simulation, planets are attracted to a central star via gravitational force. In reality, gravity follows Newton's law: F = G(m₁m₂)/r², where the force between two objects depends on their masses and the square of the distance between them.</p>
+        <p>Our simplified model only accounts for star-planet attraction (not planet-planet), making it more stable and predictable than real n-body physics.</p>
+      </div>
+
+      <div class="tech-block">
+        <h3>Planet Formation & Merging</h3>
+        <p>In the early universe, planets formed through accretion—small particles colliding and sticking together. Our collision system mimics this: when two planets collide, the larger absorbs the smaller, growing in both size and mass.</p>
+        <p>The particle explosions you see represent ejected material during these cosmic impacts, similar to how Earth's moon likely formed from debris after a massive collision.</p>
+      </div>
+
+      <div class="tech-block">
+        <h3>Black Holes & Stellar Death</h3>
+        <p>When you click "Reset," our central star collapses into a black hole—an ultra-dense region where gravity is so strong that not even light can escape. The "event horizon" (the point of no return) is represented by the dark sphere that grows.</p>
+        <p>After consuming nearby matter, the black hole implodes in our simulation, triggering a "rebirth" similar to how stellar nurseries form from the remnants of dead stars.</p>
+      </div>
+
+      <div class="tech-block">
+        <h3>The Technical Stack</h3>
+        <p><strong>Canvas API:</strong> All rendering happens on an HTML5 canvas using 2D context drawing methods.</p>
+        <p><strong>Physics Loop:</strong> Each frame calculates gravitational acceleration (a = F/m), updates velocities, and moves objects accordingly.</p>
+        <p><strong>Collision Detection:</strong> Uses simple distance checks: if distance between centers < sum of radii, objects collide.</p>
+        <p><strong>Particle Systems:</strong> Explosions spawn particles with random velocities that decay over time for visual flair.</p>
+      </div>
+
+      <div class="tech-block">
+        <h3>What We Simplified</h3>
+        <ul>
+          <li>Real gravity is much weaker (G ≈ 6.674×10⁻¹¹ m³/kg·s²)</li>
+          <li>No relativistic effects near massive objects</li>
+          <li>No tidal forces or deformation</li>
+          <li>Planets don't attract each other</li>
+          <li>Instant, perfectly inelastic collisions</li>
+          <li>2D universe (ours has at least 3 spatial dimensions!)</li>
+        </ul>
+      </div>
+
+      <div class="tech-block">
+        <h3>Real Universe Physics</h3>
+        <p>The actual universe operates on scales both vastly larger and smaller than what we can simulate. From quantum foam at the Planck scale (10⁻³⁵ m) to the observable universe spanning 93 billion light-years, reality is far stranger and more wonderful than any simulation.</p>
+        <p>General relativity shows us that massive objects don't just exert force—they curve spacetime itself. Quantum mechanics reveals that at tiny scales, particles exist in superposition until observed. These phenomena are impossible to capture in a simple JavaScript canvas!</p>
+      </div>
+    </div>
+  </section>
 
   <script src="src/scripts.js"></script>
 </body>
