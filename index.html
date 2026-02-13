@@ -7,12 +7,22 @@
   <link rel="stylesheet" href="src/styles.css" />
 </head>
 <body>
+  <!-- Loader -->
+  <div id="loader" class="loader">
+    <div class="loader-content">
+      <h2>🪐 Loading Universe...</h2>
+      <div class="loader-spinner"></div>
+      <p id="planet-fact" class="planet-fact"></p>
+    </div>
+  </div>
+
   <canvas id="universe"></canvas>
 
   <div class="ui">
     <h1>🌌 Tiny Universe</h1>
     <p>Click anywhere to spawn a planet.</p>
     <p>Watch them orbit and merge.</p>
+    <button id="reset-btn" class="reset-btn">Reset Universe</button>
   </div>
 
   <script src="src/scripts.js"></script>

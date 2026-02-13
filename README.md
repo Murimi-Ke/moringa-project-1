@@ -11,3 +11,17 @@ Built with:
 - HTML5 Canvas
 - Vanilla JavaScript
 - A questionable understanding of physics
+
+## Versioning
+### v1 - 245 BC
+- In the beginning, the universe was formless and desolate. Then, someone decided it would be a bright idea to bring that universe to you, dear user.
+- Basic functionality
+
+### v2 - 12 BC
+- Starfield Background 
+- Dynamic Background Hue Shift
+- Particle Explosions (When planets collide, they create a satisfying burst of particles that inherit the color of the merged planet and fade away).
+- Reset Button
+- Loader with random planetary facts
+- Random UFOs
+- Random Satellites 
